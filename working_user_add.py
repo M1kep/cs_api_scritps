@@ -50,25 +50,26 @@ def convert(list_to_convert):
 def check_status(status_code):
 	status_code.raise_for_status()
 
+def check_for_existing_user()
+	user_check = client.get('https://api.crowdstrike.com/users/queries/emails-by-cid/v1')
+	return user_check
+
 
 
 with open('user_to_add.csv', newline='') as csvfile:
 	reader = csv.DictReader(csvfile)
 	line_count = 0
 	for row in reader:
-		if line_count == 0:
-			line_count += 1
-		else:
-			firstName = (row['firstName'])
-			lastName = (row['lastName'])
-			uid = (row['uid'])
-			role = (row['role'])
-			create_response = create_user(firstName,lastName,uid)
-			response_dict = json_to_dict(create_response)
-			response_resources = unpack_resources(response_dict)
-			uuid = give_me_a_value(response_resources,'uuid')
-			uuid = listToString(uuid)
-			role = convert(role)
-			add_role(uuid,role)
-			line_count += 1
+		firstName = (row['firstName'])
+		lastName = (row['lastName'])
+		uid = (row['uid'])
+		role = (row['role'])
+		create_response = create_user(firstName,lastName,uid)
+		response_dict = json_to_dict(create_response)
+		response_resources = unpack_resources(response_dict)
+		uuid = give_me_a_value(response_resources,'uuid')
+		uuid = listToString(uuid)
+		role = convert(role)
+		add_role(uuid,role)
+		line_count += 1
 	print(f'Processed {line_count} Users.')
