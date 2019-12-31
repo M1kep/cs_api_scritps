@@ -52,8 +52,10 @@ def check_status(status_code):
 
 def check_for_existing_user()
 	user_check = client.get('https://api.crowdstrike.com/users/queries/emails-by-cid/v1')
+	user_check_dict = json_to_dict(user_check)
+	user_check_list = unpack_resources(user_check_dict)
+	print(user_check_dict)
 	return user_check
-
 
 
 with open('user_to_add.csv', newline='') as csvfile:
@@ -64,6 +66,7 @@ with open('user_to_add.csv', newline='') as csvfile:
 		lastName = (row['lastName'])
 		uid = (row['uid'])
 		role = (row['role'])
+
 		create_response = create_user(firstName,lastName,uid)
 		response_dict = json_to_dict(create_response)
 		response_resources = unpack_resources(response_dict)
