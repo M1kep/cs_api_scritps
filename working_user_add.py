@@ -22,14 +22,15 @@ client = OAuth2Session(client_id, token=token, auto_refresh_url=token_url,token_
 def create_user(firstName,lastName,uid):
 	create_response = client.post('https://api.crowdstrike.com/users/entities/users/v1', json={ "firstName": firstName, "lastName": lastName, "uid": uid})
 	check_status(create_response)
+	print ('Creating Account')
 	return  create_response
 
 
 def add_role(uuid,role):
 	add_role_response = client.post('https://api.crowdstrike.com/user-roles/entities/user-roles/v1?user_uuid='+uuid, json={ "roleIds": role})
 	check_status(add_role_response)
+	print ('Applying Role')
 	return add_role_response
-
 
 def json_to_dict(object):
 	output = json.loads(object.text)
@@ -50,13 +51,26 @@ def convert(list_to_convert):
 def check_status(status_code):
 	status_code.raise_for_status()
 
-def check_for_existing_user()
+def check_for_existing_user(firstName,lastName,uid):
 	user_check = client.get('https://api.crowdstrike.com/users/queries/emails-by-cid/v1')
 	user_check_dict = json_to_dict(user_check)
 	user_check_list = unpack_resources(user_check_dict)
-	print(user_check_dict)
-	return user_check
+	for i in user_check_list: 
+		if(i == uid) : 
+			print ("User Already has an account")
+			break
+		else:
+			print ("User does not have an account, proceeeding to account creation")
+			manage_user_creation(firstName,lastName,uid)
+	return uuid
 
+def manage_user_creation(firstName,lastName,uid):
+	create_response = create_user(firstName,lastName,uid)
+	response_dict = json_to_dict(create_response)
+	response_resources = unpack_resources(response_dict)
+	uuid = give_me_a_value(response_resources,'uuid')
+	uuid = listToString(uuid)
+	return uuid
 
 with open('user_to_add.csv', newline='') as csvfile:
 	reader = csv.DictReader(csvfile)
@@ -66,12 +80,7 @@ with open('user_to_add.csv', newline='') as csvfile:
 		lastName = (row['lastName'])
 		uid = (row['uid'])
 		role = (row['role'])
-
-		create_response = create_user(firstName,lastName,uid)
-		response_dict = json_to_dict(create_response)
-		response_resources = unpack_resources(response_dict)
-		uuid = give_me_a_value(response_resources,'uuid')
-		uuid = listToString(uuid)
+		uuid = check_for_existing_user(firstName,lastName,uid)
 		role = convert(role)
 		add_role(uuid,role)
 		line_count += 1
