@@ -8,9 +8,7 @@ from IPython.core.debugger import set_trace
 
 
 token_saver = []
-uid = ''
-uuid = ''
-user_exists = ''
+
  
 client_id = 'c3f3a21b955149e29cac13218d160ca5'
 client_secret = 'Mm3lv2f1Ce8HkUbENqW9JZSQhBua5i6V4DPs7rG0'
@@ -28,7 +26,7 @@ def create_user(firstName,lastName,uid):
 	create_response = client.post('https://api.crowdstrike.com/users/entities/users/v1', json={ "firstName": firstName, "lastName": lastName, "uid": uid})
 	print ('Creating Account')
 	check_status(create_response)
-	return  create_response
+	return create_response
 
 
 def add_role(uuid,role):
@@ -56,6 +54,14 @@ def convert(list_to_convert):
 def check_status(status_code):
 	status_code.raise_for_status()
 
+def listToString(s):  
+    str1 = ""  
+    
+    for ele in s:  
+        str1 += ele   
+    
+    return str1
+
 def check_for_existing_user(firstName,lastName,uid):
 	user_check = client.get('https://api.crowdstrike.com/users/queries/emails-by-cid/v1')
 	user_check_dict = json_to_dict(user_check)
@@ -66,13 +72,13 @@ def check_for_existing_user(firstName,lastName,uid):
 	else:
 			#print("User needs account created", uid)
 			user_exists = 'false'
-			manage_user_creation(firstName,lastName,uid)
-	return uuid,user_exists
+	return user_exists
 
 def manage_user_creation(firstName,lastName,uid):
 	create_response = create_user(firstName,lastName,uid)
 	response_dict = json_to_dict(create_response)
 	response_resources = unpack_resources(response_dict)
+	print(response_resources)
 	uuid = give_me_a_value(response_resources,'uuid')
 	uuid = listToString(uuid)
 	return uuid
@@ -85,9 +91,10 @@ with open('user_to_add.csv', newline='') as csvfile:
 		lastName = (row['lastName'])
 		uid = (row['uid'])
 		role = (row['role'])
-		uuid,user_exists = check_for_existing_user(firstName,lastName,uid)
+		user_exists = check_for_existing_user(firstName,lastName,uid)
 		if user_exists =='false':
-			print(user_exists)
+			set_trace()
+			uuid = manage_user_creation(firstName,lastName,uid)
 			role = convert(role)
 			add_role(uuid,role)
 			line_count += 1
