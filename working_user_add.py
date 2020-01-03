@@ -4,8 +4,13 @@ from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session
 import json
 import csv
+from IPython.core.debugger import set_trace
+
 
 token_saver = []
+uid = ''
+uuid = ''
+user_exists = ''
  
 client_id = 'c3f3a21b955149e29cac13218d160ca5'
 client_secret = 'Mm3lv2f1Ce8HkUbENqW9JZSQhBua5i6V4DPs7rG0'
@@ -21,8 +26,8 @@ client = OAuth2Session(client_id, token=token, auto_refresh_url=token_url,token_
 
 def create_user(firstName,lastName,uid):
 	create_response = client.post('https://api.crowdstrike.com/users/entities/users/v1', json={ "firstName": firstName, "lastName": lastName, "uid": uid})
-	check_status(create_response)
 	print ('Creating Account')
+	check_status(create_response)
 	return  create_response
 
 
@@ -55,14 +60,14 @@ def check_for_existing_user(firstName,lastName,uid):
 	user_check = client.get('https://api.crowdstrike.com/users/queries/emails-by-cid/v1')
 	user_check_dict = json_to_dict(user_check)
 	user_check_list = unpack_resources(user_check_dict)
-	for i in user_check_list: 
-		if(i == uid) : 
-			print ("User Already has an account")
-			break
-		else:
-			print ("User does not have an account, proceeeding to account creation")
+	if uid in user_check_list:
+			#print("User has account check", uid)
+			user_exists = 'true'
+	else:
+			#print("User needs account created", uid)
+			user_exists = 'false'
 			manage_user_creation(firstName,lastName,uid)
-	return uuid
+	return uuid,user_exists
 
 def manage_user_creation(firstName,lastName,uid):
 	create_response = create_user(firstName,lastName,uid)
@@ -80,8 +85,14 @@ with open('user_to_add.csv', newline='') as csvfile:
 		lastName = (row['lastName'])
 		uid = (row['uid'])
 		role = (row['role'])
-		uuid = check_for_existing_user(firstName,lastName,uid)
-		role = convert(role)
-		add_role(uuid,role)
-		line_count += 1
+		uuid,user_exists = check_for_existing_user(firstName,lastName,uid)
+		if user_exists =='false':
+			print(user_exists)
+			role = convert(role)
+			add_role(uuid,role)
+			line_count += 1
+			print('User Created',uid)
+			print('User Added with role',role)
+		else:
+			print('User Exists,',uid)
 	print(f'Processed {line_count} Users.')
