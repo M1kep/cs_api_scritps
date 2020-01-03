@@ -1,4 +1,9 @@
 
+#!/usr/bin/python 
+
+"""Simple Script to Create Users using CrowdStrike Falcon API """
+
+
 from oauthlib.oauth2 import BackendApplicationClient
 from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session
