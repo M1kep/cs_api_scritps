@@ -88,23 +88,26 @@ def manage_user_creation(firstName,lastName,uid):
 	uuid = listToString(uuid)
 	return uuid
 
-with open('user_to_add.csv', newline='') as csvfile:
-	reader = csv.DictReader(csvfile)
-	line_count = 0
-	for row in reader:
-		firstName = (row['firstName'])
-		lastName = (row['lastName'])
-		uid = (row['uid'])
-		role = (row['role'])
-		user_exists = check_for_existing_user(firstName,lastName,uid)
-		if user_exists =='false':
-			set_trace()
-			uuid = manage_user_creation(firstName,lastName,uid)
-			role = convert(role)
-			add_role(uuid,role)
-			line_count += 1
-			print('User Created',uid)
-			print('User Added with role',role)
-		else:
-			print('User Exists,',uid)
-	print(f'Processed {line_count} Users.')
+
+
+if __name__ == "__main__":
+	with open('user_to_add.csv', newline='') as csvfile:
+		reader = csv.DictReader(csvfile)
+		line_count = 0
+		for row in reader:
+			firstName = (row['firstName'])
+			lastName = (row['lastName'])
+			uid = (row['uid'])
+			role = (row['role'])
+			user_exists = check_for_existing_user(firstName,lastName,uid)
+			if user_exists =='false':
+				set_trace()
+				uuid = manage_user_creation(firstName,lastName,uid)
+				role = convert(role)
+				add_role(uuid,role)
+				line_count += 1
+				print('User Created',uid)
+				print('User Added with role',role)
+			else:
+				print('User Exists,',uid)
+		print(f'Processed {line_count} Users.')
