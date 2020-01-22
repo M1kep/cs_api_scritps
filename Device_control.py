@@ -27,13 +27,13 @@ def token_produce(expire,extra,client_id,client_secret,token_url):
 
 
 def create_file_submission_json(serial_number):
-	updateValues =     (
+	updateValues =    [ 
                                 "vendor_name": "",
                                 "product_name": "",
                                 "serial_number": serial_number,
                                 "combined_id": "",
                                 "action": "FULL_ACCESS",
-                                "match_method": "VID_PID_SERIAL" )
+                                "match_method": "VID_PID_SERIAL"  ]
                             
 	return updateValues 
 
