@@ -37,18 +37,18 @@ extra = {
  }
  
 
-client = ''
+# client = ''
 
 
-def token_produce(client,expire,extra,client_id,client_secret,token_url):
-	if time.time() > expire:
-		auth = HTTPBasicAuth(client_id, client_secret)
-		client = BackendApplicationClient(client_id=client_id)
-		oauth = OAuth2Session(client=client)
-		token = oauth.fetch_token(token_url=token_url, auth=auth)
-		client = OAuth2Session(client_id, token=token, auto_refresh_kwargs=extra, auto_refresh_url=token_url,token_updater=token_saver)
-		expire = token['expires_at']
-	return expire,client 
+# def token_produce(client,expire,extra,client_id,client_secret,token_url):
+if time.time() > expire:
+	auth = HTTPBasicAuth(client_id, client_secret)
+	client = BackendApplicationClient(client_id=client_id)
+	oauth = OAuth2Session(client=client)
+	token = oauth.fetch_token(token_url=token_url, auth=auth)
+	client = OAuth2Session(client_id, token=token, auto_refresh_kwargs=extra, auto_refresh_url=token_url,token_updater=token_saver)
+	expire = token['expires_at']
+	# return expire,client 
 
 def upload_file(filename):
 	data = open(filename, 'rb').read()
@@ -142,7 +142,7 @@ def create_ioc_submission_json(typeIOC,valueIOC):
 
 
 if __name__ == "__main__":
-	expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
+	# expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
 	filename = 'w64.exe'
 	upload_file(filename)
 	file_info = create_file_submission_json(filename)

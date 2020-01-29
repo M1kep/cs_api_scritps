@@ -30,22 +30,21 @@ extra = {
 'client_secret': client_secret,
  }
 
-client = ''
+# client = ''
 
 
-def token_produce(client,expire,extra,client_id,client_secret,token_url):
-	if time.time() > expire:
-		auth = HTTPBasicAuth(client_id, client_secret)
-		client = BackendApplicationClient(client_id=client_id)
-		oauth = OAuth2Session(client=client)
-		token = oauth.fetch_token(token_url=token_url, auth=auth)
-		client = OAuth2Session(client_id, token=token, auto_refresh_kwargs=extra, auto_refresh_url=token_url,token_updater=token_saver)
-		expire = token['expires_at']
-		return expire,client 
+# def token_produce(client,expire,extra,client_id,client_secret,token_url):
+if time.time() > expire:
+	auth = HTTPBasicAuth(client_id, client_secret)
+	client = BackendApplicationClient(client_id=client_id)
+	oauth = OAuth2Session(client=client)
+	token = oauth.fetch_token(token_url=token_url, auth=auth)
+	client = OAuth2Session(client_id, token=token, auto_refresh_kwargs=extra, auto_refresh_url=token_url,token_updater=token_saver)
+	expire = token['expires_at']
+	# return expire,client 
 
 
 def create_user(firstName,lastName,uid):
-	expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
 	create_response = client.post('https://api.crowdstrike.com/users/entities/users/v1', json={ "firstName": firstName, "lastName": lastName, "uid": uid})
 	print ('Creating Account')
 	check_status(create_response)
@@ -53,7 +52,6 @@ def create_user(firstName,lastName,uid):
 
 
 def add_role(uuid,role):
-	expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
 	add_role_response = client.post('https://api.crowdstrike.com/user-roles/entities/user-roles/v1?user_uuid='+uuid, json={ "roleIds": role})
 	check_status(add_role_response)
 	print ('Applying Role')
@@ -87,7 +85,6 @@ def listToString(s):
     return str1
 
 def check_for_existing_user(firstName,lastName,uid):
-	expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
 	user_check = client.get('https://api.crowdstrike.com/users/queries/emails-by-cid/v1')
 	user_check_dict = json_to_dict(user_check)
 	user_check_list = unpack_resources(user_check_dict)
@@ -100,7 +97,6 @@ def check_for_existing_user(firstName,lastName,uid):
 	return user_exists
 
 def manage_user_creation(firstName,lastName,uid):
-	expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
 	create_response = create_user(firstName,lastName,uid)
 	response_dict = json_to_dict(create_response)
 	response_resources = unpack_resources(response_dict)
