@@ -3,15 +3,17 @@ from oauthlib.oauth2 import BackendApplicationClient
 from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session
 import json
-import csv
 from IPython.core.debugger import set_trace
+import time
 
 
 
 expire = 0
 
+client = ''
 
-def token_produce(expire,extra,client_id,client_secret,token_url):
+
+def token_produce(client,expire,extra,client_id,client_secret,token_url):
 	if time.time() > expire:
 		auth = HTTPBasicAuth(client_id, client_secret)
 		client = BackendApplicationClient(client_id=client_id)
@@ -70,7 +72,8 @@ serial_number = ''
 
 
 if __name__ == "__main__":
-	expire,client = token_produce(expire,extra,client_id,client_secret,token_url)
+	expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
+
 
 
 

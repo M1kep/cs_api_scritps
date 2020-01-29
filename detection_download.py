@@ -21,7 +21,9 @@ from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session, TokenUpdated
 import json
 import csv
+# Add below for ability to debug better 
 from IPython.core.debugger import set_trace
+import time 
 
 
 token_saver = []
@@ -42,13 +44,13 @@ expire = 0
 # oauth = OAuth2Session(client=client)
 # token = oauth.fetch_token(token_url=token_url, auth=auth)
 
-
+client = ''
 
 # client = OAuth2Session(client_id, token=token, auto_refresh_kwargs=extra, auto_refresh_url=token_url,token_updater=token_saver)
 
 
 
-def token_produce(expire,extra,client_id,client_secret,token_url):
+def token_produce(client,expire,extra,client_id,client_secret,token_url):
 	if time.time() > expire:
 		auth = HTTPBasicAuth(client_id, client_secret)
 		client = BackendApplicationClient(client_id=client_id)
@@ -82,14 +84,6 @@ def get_detections1():
 	detect_list = unpack_resources(detect_dict)
 	return detect_list,detect_dict
 
-def get_detections_critical():
-	#Limited to first one 
-	print ('Requesting Critical Detections')
-	detect = client.get('https://api.crowdstrike.com/detects/queries/detects/v1?filter=max_severity_displayname: 'Critical'')
-	check_status(detect)
-	detect_dict = json_to_dict(detect)
-	detect_list = unpack_resources(detect_dict)
-	return detect_list,detect_dict
 
 def get_detect_details(id):
 	get_detects_info = client.post('https://api.crowdstrike.com/detects/entities/summaries/GET/v1', json={ "ids": id})
@@ -129,7 +123,7 @@ def unpack_aid(detect_list):
 
 
 if __name__ == "__main__":
-	expire,client = token_produce(expire,extra,client_id,client_secret,token_url)
+	expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
 	detects_list,detects_dict = get_detections1()
 	alot_of_detects = get_detect_details(detects_list)
 	aid = unpack_aid(alot_of_detects)

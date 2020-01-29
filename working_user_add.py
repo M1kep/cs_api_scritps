@@ -15,6 +15,7 @@ from requests_oauthlib import OAuth2Session
 import json
 import csv
 from IPython.core.debugger import set_trace
+import time 
 
 
 token_saver = []
@@ -23,10 +24,16 @@ expire = 0
 client_id = 'c3f3a21b955149e29cac13218d160ca5'
 client_secret = 'Mm3lv2f1Ce8HkUbENqW9JZSQhBua5i6V4DPs7rG0'
 token_url = 'https://api.crowdstrike.com/oauth2/token'
- 
+
+extra = {
+'client_id': client_id,
+'client_secret': client_secret,
+ }
+
+client = ''
 
 
-def token_produce(expire,extra,client_id,client_secret,token_url):
+def token_produce(client,expire,extra,client_id,client_secret,token_url):
 	if time.time() > expire:
 		auth = HTTPBasicAuth(client_id, client_secret)
 		client = BackendApplicationClient(client_id=client_id)
@@ -38,6 +45,7 @@ def token_produce(expire,extra,client_id,client_secret,token_url):
 
 
 def create_user(firstName,lastName,uid):
+	expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
 	create_response = client.post('https://api.crowdstrike.com/users/entities/users/v1', json={ "firstName": firstName, "lastName": lastName, "uid": uid})
 	print ('Creating Account')
 	check_status(create_response)
@@ -45,6 +53,7 @@ def create_user(firstName,lastName,uid):
 
 
 def add_role(uuid,role):
+	expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
 	add_role_response = client.post('https://api.crowdstrike.com/user-roles/entities/user-roles/v1?user_uuid='+uuid, json={ "roleIds": role})
 	check_status(add_role_response)
 	print ('Applying Role')
@@ -78,6 +87,7 @@ def listToString(s):
     return str1
 
 def check_for_existing_user(firstName,lastName,uid):
+	expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
 	user_check = client.get('https://api.crowdstrike.com/users/queries/emails-by-cid/v1')
 	user_check_dict = json_to_dict(user_check)
 	user_check_list = unpack_resources(user_check_dict)
@@ -90,6 +100,7 @@ def check_for_existing_user(firstName,lastName,uid):
 	return user_exists
 
 def manage_user_creation(firstName,lastName,uid):
+	expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
 	create_response = create_user(firstName,lastName,uid)
 	response_dict = json_to_dict(create_response)
 	response_resources = unpack_resources(response_dict)
@@ -97,8 +108,6 @@ def manage_user_creation(firstName,lastName,uid):
 	uuid = give_me_a_value(response_resources,'uuid')
 	uuid = listToString(uuid)
 	return uuid
-
-
 
 if __name__ == "__main__":
 	# Give a csv of format firstName,lastName,uid(email), role and deploy 
@@ -110,6 +119,7 @@ if __name__ == "__main__":
 			lastName = (row['lastName'])
 			uid = (row['uid'])
 			role = (row['role'])
+			# expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
 			user_exists = check_for_existing_user(firstName,lastName,uid)
 			if user_exists =='false':
 				set_trace()
@@ -121,4 +131,4 @@ if __name__ == "__main__":
 				print('User Added with role',role)
 			else:
 				print('User Exists,',uid)
-		print(f'Processed {line_count} Users.')
+				# print(f'Processed {line_count} Users.')
