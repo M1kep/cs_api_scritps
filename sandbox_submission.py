@@ -20,6 +20,7 @@ from requests_oauthlib import OAuth2Session
 import json
 from IPython.core.debugger import set_trace
 import time
+from time import sleep 
 import hashlib 
 
 
@@ -70,6 +71,12 @@ def get_summary_report(ids):
 	get_summary_report = client.get('https://api.crowdstrike.com/falconx/entities/report-summaries/v1?ids='+ids)
 	check_status(get_summary_report)
 	return get_summary_report
+
+def get_full_report(ids):
+	get_full_report = client.get('https://api.crowdstrike.com/falconx/entities/reports/v1?ids='+ids)
+	check_status(get_summary_report)
+    return get_full_report
+	
 
 def calculate_sh256(filename):
 	# Only for small files
@@ -143,7 +150,7 @@ def create_ioc_submission_json(typeIOC,valueIOC):
 
 if __name__ == "__main__":
 	# expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
-	filename = 'w64.exe'
+	filename = '69516a84c00cf22fc911db555d024efb8a290951d955a5e37c635639bebb2cd9_TAvW58DXEE'
 	upload_file(filename)
 	file_info = create_file_submission_json(filename)
 	submit_info = submit_file(file_info)
@@ -158,6 +165,8 @@ if __name__ == "__main__":
 		print('Done')
 	summary_report = get_summary_report(id)
 	summary_info = json_to_dict(summary_report)
+	full_report = get_full_report(id)
+	full_info = json_to_dict(full_report)
 	# Collect the IOC and Submit (should check for IOC prior to or does system do it)
 
 
