@@ -50,15 +50,6 @@ expire = 0
 
 
 
-# def token_produce(client,expire,extra,client_id,client_secret,token_url):
-if time.time() > expire:
-	auth = HTTPBasicAuth(client_id, client_secret)
-	client = BackendApplicationClient(client_id=client_id)
-	oauth = OAuth2Session(client=client)
-	token = oauth.fetch_token(token_url=token_url, auth=auth)
-	client = OAuth2Session(client_id, token=token, auto_refresh_kwargs=extra, auto_refresh_url=token_url,token_updater=token_saver)
-	expire = token['expires_at']
-		# return expire,client 
 
 
 
@@ -124,6 +115,15 @@ def unpack_aid(detect_list):
 
 if __name__ == "__main__":
 	# expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
+# def token_produce(client,expire,extra,client_id,client_secret,token_url):
+	if time.time() > expire:
+		auth = HTTPBasicAuth(client_id, client_secret)
+		client = BackendApplicationClient(client_id=client_id)
+		oauth = OAuth2Session(client=client)
+		token = oauth.fetch_token(token_url=token_url, auth=auth)
+		client = OAuth2Session(client_id, token=token, auto_refresh_kwargs=extra, auto_refresh_url=token_url,token_updater=token_saver)
+		expire = token['expires_at']
+		# return expire,client 
 	detects_list,detects_dict = get_detections1()
 	alot_of_detects = get_detect_details(detects_list)
 	aid = unpack_aid(alot_of_detects)

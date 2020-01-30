@@ -73,9 +73,17 @@ def get_summary_report(ids):
 	return get_summary_report
 
 def get_full_report(ids):
+	/falconx/queries/reports/v1?filter='submit_name': '69516a84c00cf22fc911db555d024efb8a290951d955a5e37c635639bebb2cd9_TAvW58DXEE'
 	get_full_report = client.get('https://api.crowdstrike.com/falconx/entities/reports/v1?ids='+ids)
 	check_status(get_summary_report)
     return get_full_report
+
+
+def get_full_report(ids):
+	# Get other data need filter list 
+	get_full_report = client.get('https://api.crowdstrike.com/falconx/entities/artifacts/v1?ids='+ids)
+	check_status(get_full_report)
+	return get_full_report
 	
 
 def calculate_sh256(filename):
