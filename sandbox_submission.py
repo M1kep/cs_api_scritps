@@ -42,14 +42,7 @@ extra = {
 
 
 # def token_produce(client,expire,extra,client_id,client_secret,token_url):
-if time.time() > expire:
-	auth = HTTPBasicAuth(client_id, client_secret)
-	client = BackendApplicationClient(client_id=client_id)
-	oauth = OAuth2Session(client=client)
-	token = oauth.fetch_token(token_url=token_url, auth=auth)
-	client = OAuth2Session(client_id, token=token, auto_refresh_kwargs=extra, auto_refresh_url=token_url,token_updater=token_saver)
-	expire = token['expires_at']
-	# return expire,client 
+
 
 def upload_file(filename):
 	data = open(filename, 'rb').read()
@@ -72,18 +65,23 @@ def get_summary_report(ids):
 	check_status(get_summary_report)
 	return get_summary_report
 
-def get_full_report(ids):
-	/falconx/queries/reports/v1?filter='submit_name': '69516a84c00cf22fc911db555d024efb8a290951d955a5e37c635639bebb2cd9_TAvW58DXEE'
-	get_full_report = client.get('https://api.crowdstrike.com/falconx/entities/reports/v1?ids='+ids)
+# def get_full_report(ids):
+# 	# Work in progress to search for file reports
+# 	/falconx/queries/reports/v1?filter='submit_name': '69516a84c00cf22fc911db555d024efb8a290951d955a5e37c635639bebb2cd9_TAvW58DXEE'
+# 	get_full_report = client.get('https://api.crowdstrike.com/falconx/entities/reports/v1?ids='+ids)
+# 	check_status(get_summary_report)
+#     return get_full_report
+
+def get_artifacts(ids,file_name)
+	get_artifacts = client.get('https://api.crowdstrike.com/falconx/entities/artifacts/v1?id=a937e58f624845cc84f11687d727ed33_47f496d3c1904ccca1d20f8de00b52df&name=https%3A%2F%2Fapi.crowdstrike.com%2Ffalconx%2Fentities%2Fartifacts%2Fv1%3Fid%3Da937e58f624845cc84f11687d727ed33_47f496d3c1904ccca1d20f8de00b52df.gzip',headers={"Access-Encoding":"gzip"})
 	check_status(get_summary_report)
-    return get_full_report
+	# Need to handle downloads 
 
-
-def get_full_report(ids):
-	# Get other data need filter list 
-	get_full_report = client.get('https://api.crowdstrike.com/falconx/entities/artifacts/v1?ids='+ids)
-	check_status(get_full_report)
-	return get_full_report
+# def get_full_report(ids):
+# 	# Get other data need filter list 
+# 	get_full_report = client.get('https://api.crowdstrike.com/falconx/entities/artifacts/v1?ids='+ids)
+# 	check_status(get_full_report)
+# 	return get_full_report
 	
 
 def calculate_sh256(filename):
@@ -96,15 +94,43 @@ def calculate_sh256(filename):
 
 def create_file_submission_json(filename):
 	sha256 = calculate_sh256(filename)
+# {
+#     "sandbox": [
+#         {
+#             "action_script": "<string>",
+#             "command_line": "<string>",
+#             "document_password": "<string>",
+#             "enable_tor": "<boolean>",
+#             "environment_id": "<integer>",
+#             "sha256": "<string>",
+#             "submit_name": "<string>",
+#             "system_date": "<string>",
+#             "system_time": "<string>",
+#             "url": "<string>"
+#         }]}
+# 	300: Linux Ubuntu 16.04, 64-bit
+# 	200: Android (static analysis)
+# 	160: Windows 10, 64-bit
+# 	110: Windows 7, 64-bit
+# 	100: Windows 7, 32-bit
 	file_info = {
     "sandbox": [{
         "sha256": sha256,
-        "environment_id": 100,
+        "environment_id": 110,
         "submit_name": filename
     }]
 }
 	return file_info 
 
+# file_info = {
+#   "sandbox": [
+#     {
+#       "environment_id": 110,
+#       "sha256": "69516a84c00cf22fc911db555d024efb8a290951d955a5e37c635639bebb2cd9",
+#       "submit_name": "69516a84c00cf22fc911db555d024efb8a290951d955a5e37c635639bebb2cd9_TAvW58DXEE"
+#     }
+#   ]
+# }
 
 def convert(list_to_convert):
 	# Convert String to List 
@@ -129,7 +155,9 @@ def unpack_errors(name_of_sub):
 	return errors
 
 def get_status_submission(name_of_sub):
-	progress = name_of_sub['meta']['quota']['in_progress']
+	# Looks at incorrect area now 
+	progress = name_of_sub['resources'][0]['state']
+	# progress = name_of_sub['meta']['quota']['in_progress']
 	return progress
 
 def unpack_job_id(name_of_sub):
@@ -158,6 +186,14 @@ def create_ioc_submission_json(typeIOC,valueIOC):
 
 if __name__ == "__main__":
 	# expire,client = token_produce(client,expire,extra,client_id,client_secret,token_url)
+	if time.time() > expire:
+		auth = HTTPBasicAuth(client_id, client_secret)
+		client = BackendApplicationClient(client_id=client_id)
+		oauth = OAuth2Session(client=client)
+		token = oauth.fetch_token(token_url=token_url, auth=auth)
+		client = OAuth2Session(client_id, token=token, auto_refresh_kwargs=extra, auto_refresh_url=token_url,token_updater=token_saver)
+		expire = token['expires_at']
+	# return expire,client 
 	filename = '69516a84c00cf22fc911db555d024efb8a290951d955a5e37c635639bebb2cd9_TAvW58DXEE'
 	upload_file(filename)
 	file_info = create_file_submission_json(filename)
@@ -167,14 +203,16 @@ if __name__ == "__main__":
 	sleep(900)
 	file_status = check_file_progress(id)
 	file_progress = json_to_dict(file_status)
-	if get_status_submission(file_progress) == 1:
+	if get_status_submission(file_progress) == 'running':
 		print('In Progress')
+	elif get_status_submission(file_progress) == 'error':
+		print('Processing Failed')
 	else: 
 		print('Done')
 	summary_report = get_summary_report(id)
 	summary_info = json_to_dict(summary_report)
-	full_report = get_full_report(id)
-	full_info = json_to_dict(full_report)
+	# full_report = get_full_report(id)
+	# full_info = json_to_dict(full_report)
 	# Collect the IOC and Submit (should check for IOC prior to or does system do it)
 
 
